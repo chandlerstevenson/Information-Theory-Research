@@ -4,6 +4,6 @@ as a member of the World of Bits Research Group with Professor Rose.
 
 For more info about my research, please visit: www.chandlerstevenson.com
 
-#Summary of Files:  
+# Summary of Files:  
 
 ranker.py: Lists a ranked ordered noise sequences given the probability of error in a channel 
