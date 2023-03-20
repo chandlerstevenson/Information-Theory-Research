@@ -133,7 +133,3 @@ print(f"codeword with error {codeword}")
 grand = find_error(codeword, genarr_lst, H) 
 
 print(grand)
-
-test = np.mod(np.dot(np.array([0,0,1,1,0,1]), H.T), 2)
-print(test)
-
