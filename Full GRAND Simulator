@@ -1,3 +1,9 @@
+# GRAND
+
+# K. R. Duffy, J. Li, and M. Medard, "Capacity-achieving guessing random 
+# additive noise decoding," IEEE Trans. Inf. Theory, vol. 65, no. 7, pp. 
+#  4023–4040, 2019.
+
 from base64 import decode
 import numpy as np
 import itertools 
