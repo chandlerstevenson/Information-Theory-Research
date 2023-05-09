@@ -29,9 +29,9 @@ def create_canonical_matrices(n, k, density=0.6):
     assert np.array_equal(product, np.zeros((k, n-k), dtype=int)), "GH is not equal to the zero matrix"
     return G, H
 
-n_dim = 128
-k_dim = 116
-density = 0.5
+n_dim = 128 #user input
+k_dim = 116 #user input
+density = 0.5 #user input
 
 G, H = create_canonical_matrices(n_dim, k_dim, density)
 
@@ -202,7 +202,7 @@ payload_ber_values = []
 block_error_values = [] 
 total_trial_tries = []  
 channel_cap_values = []
-max_weight = 8
+max_weight = 8 #user input 
 
 for snr_db in Eb_N0_db:
     # Clear the decoded_bits list at the beginning of each iteration
@@ -275,9 +275,9 @@ prob_error_values = [0.5 * math.erfc(math.sqrt(10 ** (snr_db / 10))) for snr_db 
 # Turn on interactive mode
 plt.ion()
 plt.figure
-plt.plot(Eb_N0_db, payload_ber_values, marker='o', linestyle='-', label='BER')
+plt.plot(Eb_N0_db, ber_values, marker='o', linestyle='-', label='BER')
 
-# plt.plot(Eb_N0_db, payload_ber_values, marker='o', linestyle=':', color='g', label='Payload BER')
+plt.plot(Eb_N0_db, payload_ber_values, marker='o', linestyle=':', color='g', label='Payload BER')
 # Plot Eb/N0 vs. probability of error
 plt.plot(Eb_N0_db, prob_error_values, marker='s', linestyle='--', color='r', label='Probability of Error')
 
