@@ -45,13 +45,6 @@ G, H = create_canonical_matrices(n_dim, k_dim, density)
 def increment_error_locations(locations, err_loc_vec):
     max_index = len(locations) - 1
 
-    # # If this is the first error vector, initialize to the first initial_weight positions
-    # if not err_loc_vec:
-    #     if initial_weight is not None:
-    #         return locations[:initial_weight]
-    #     else:
-    #         return locations[:1]
-
     # Increment to the next error vector
     while True: 
         for ii in range(len(err_loc_vec) -1, -1, -1):
@@ -77,7 +70,7 @@ def increment_error_locations(locations, err_loc_vec):
 
 # length = 128
 # weight = 3
-# locations = list(range(1, length + 1))
+# locations = list(range(1, length + 1))          TESTING AREA
 # err_loc_vec = []
 
     
@@ -94,16 +87,6 @@ def generate_sequence(length, location_vector):
 
     return binary_sequence
 
-# length = 4
-# weight = 4
-# locations = list(range(1, length + 1))
-# err_loc_vec = [1,2,3]
-# while True:
-#     err_loc_vec = increment_error_locations(locations, err_loc_vec)
-#     if not err_loc_vec:
-#         break 
-#     print(err_loc_vec)
-#     # print(generate_sequence(length, err_loc_vec))
 
 import numpy as np
 
