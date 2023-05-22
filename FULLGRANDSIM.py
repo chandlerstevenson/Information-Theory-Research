@@ -4,17 +4,17 @@
 # additive noise decoding," IEEE Trans. Inf. Theory, vol. 65, no. 7, pp. 
 #  4023–4040, 2019.
 
-from base64 import decode
 import numpy as np
-import itertools 
-import numpy as np  
 import math 
-import scipy as sp  
-import random  
-import itertools 
-from itertools import product 
 import matplotlib.pyplot as plt 
-import time 
+import time  #This profile is to measure the time a program takes to run 
+
+# Make Generator Matrices 
+# * Generator Parity Check Matrix must satisfy the condition GH == 0  
+# * If condition is not met, return error (condition is usually met) 
+# * Density describes the 'amount of 1's' in the parity portion (0 no zeros, 1 all zeros) 
+# * Generator matrices are Nxk where N is the number of total bits and k is the number of  
+#   information bits. 
 
 def create_canonical_matrices(n, k, density=0.6):
     if n <= k:
@@ -41,10 +41,12 @@ density = 0.5 #user input
 
 G, H = create_canonical_matrices(n_dim, k_dim, density)
 
-
+# Here, we use a incrementation techinque to calculate the next error sequence location  
+# * Example: For a error sequence of length 6 and weight 3, [1,2,3] would become [1,2,4] 
+# *          [1,2,6] would become [1,3,4] 
+# * Repeat indices are not permitted 
 def increment_error_locations(locations, err_loc_vec):
     max_index = len(locations) - 1
-
     # Increment to the next error vector
     while True: 
         for ii in range(len(err_loc_vec) -1, -1, -1):
@@ -66,14 +68,8 @@ def increment_error_locations(locations, err_loc_vec):
         if len(set(err_loc_vec)) == len(err_loc_vec):
             return err_loc_vec
 
-
-
-# length = 128
-# weight = 3
-# locations = list(range(1, length + 1))          TESTING AREA
-# err_loc_vec = []
-
-    
+# Consumes a set length and a vector locations and outputs the corresponding  
+#   * Example: [1, 2, 3] for a length 6 codeword would become [1,1,1,0,0,0]
 def generate_sequence(length, location_vector):
     binary_sequence = [0] * (length)
 
@@ -87,22 +83,26 @@ def generate_sequence(length, location_vector):
 
     return binary_sequence
 
-
-import numpy as np
-
+# check_decoding is not used for calculation, but is useful for testing
 def check_decoding(nois_codeword, H):
     syndrome = np.dot(H, nois_codeword) % 2
     return np.all(syndrome == 0)
 
-
+# * Uses exponential distribution to calculate the probability for  
+# *     maximum likely decoding.  
+# Ex: The most likely error sequence for low pobabilities of error would be 
+#       the sequence of all zeroes. 
 def calculate_error_probability(error_vector, prob_error, n_dim):
     num_errors = np.sum(error_vector)
     return (1 - prob_error) ** (n_dim - num_errors) * prob_error ** num_errors
 
-
+# * Consumes a vector of messages and a generator matrix and returns the  
+# *    corresponding set of codewords (encoded messages). 
 def encode_messages(messages, generator_matrix):
     return np.dot(messages, generator_matrix) % 2
 
+# * Calculates the BER (Bit Error Rate) given a set of original codewords and  
+# *     decoded codewords 
 def ber(codewords, decoded_codewords_list):
     num_errors = 0
     num_compared_bits = 0
@@ -119,13 +119,18 @@ def ber(codewords, decoded_codewords_list):
 
 
 
-
+# * Introduces error to a set of codewords to simulate noise.  
+# *     Must consume a valid probability of error. 
 def introduce_error(codeword, prob_error):
     error = np.random.choice([0, 1], size=codeword.shape, p=[1 - prob_error, prob_error])
     return (codeword + error) % 2
 
 
-
+# * For this decoding scheme, the GRAND algorithm is used to decode  
+# * Any valid decoding scheme for RLCs (Random Linear Codes) should work 
+# * In this case, the decoder sets a 'max weight' which describes the maximum 
+# *     number of ones in an error sequence -> ex: [1 0 0] would have weight 1  
+# * BinomialWeight.py is recommended for deciding this maximum weight
 def decoder(noisy_codeword, length, max_weight, H):
     # Check if the given noisy codeword already satisfies Hy = 0
     initial_syndrome = np.dot(H, noisy_codeword) % 2
@@ -148,12 +153,14 @@ def decoder(noisy_codeword, length, max_weight, H):
                 decoded_bits = np.mod(corrected_codeword, 2).tolist()
                 return np.array(decoded_bits), num_tries
 
+# This is where a Block Error is declared.  
+# The block error can be anything so long as it is unique from the set of codewords   
     return np.array([]), num_tries
 
 
-
-
-
+# * Payload refers to the information portion of the codewords 
+# * This follows the same logic of the codeword BER with the addition of  
+# *     counting the number of block errors. 
 def payload_ber(messages, decoded_codewords_list, k_dim):
     num_compared_bits = 0
     block_errors = 0  
@@ -169,6 +176,8 @@ def payload_ber(messages, decoded_codewords_list, k_dim):
 
     return total_bit_errors / num_compared_bits
 
+# * Channel Capacity is a metric of the efficacy of channel given a  
+# *     probability of error. 
 def channel_capacity(prob_error):   
     p = prob_error  
     q = 1-p
@@ -176,23 +185,30 @@ def channel_capacity(prob_error):
     chan_cap = 1 - Entropy 
     return chan_cap 
 
-
+# This is the number of messages sent  
+# For large values of N_dim and k_dim (~100), a value of 1000 is sufficient. 
 num_messages = 1000
-import numpy as np
-from scipy.stats import norm
 
+# Eb/N0 describes the signal to noise ratio 
+# This range is generally sufficient
 Eb_N0_db = np.arange(1, 7.5, 1)
-ber_values = []
 
+
+# Here, we store the results to be graphed in each iteration  
+
+ber_values = []
 bler_values = []
 print("decoding...")
-
 payload_ber_values = []
 block_error_values = [] 
 total_trial_tries = []  
 channel_cap_values = []
+
+
+
 max_weight = 8 #user input 
 
+# This loop uses the functions defined above to store results in the empty lists above 
 for snr_db in Eb_N0_db:
     # Clear the decoded_bits list at the beginning of each iteration
     decoded_bits = []
@@ -251,14 +267,11 @@ print(channel_cap_values, "channel_cap_values")
 print("code rate", k_dim/n_dim)
 avg_num_trials_through = np.sum(total_trial_tries)/7 
 
-first_trial = [0.0700234375, 0.0505625, 0.0305703125, 0.0146484375, 0.0045078125, 0.0013671875, 4.6875e-05] 
-second_trial = [0.070078125, 0.05025, 0.0305703125, 0.01346875, 0.0045859375, 0.001046875, 9.375e-05]
 
 
-# print(len(decoded_bits))
 
-# print(ber_values) 
-# print(bits)
+# Plot Results :D 
+
 # Calculate probability of error for each Eb/N0 value
 prob_error_values = [0.5 * math.erfc(math.sqrt(10 ** (snr_db / 10))) for snr_db in Eb_N0_db]
 # Turn on interactive mode
